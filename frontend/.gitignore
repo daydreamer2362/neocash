@@ -1,0 +1,52 @@
+# Dependencies
+node_modules
+
+# Build artifacts
+dist
+dist-ssr
+build
+coverage
+android/.gradle
+android/.cxx
+android/build
+android/app/build
+android/capacitor-cordova-android-plugins/build
+*.apk
+*.aab
+*.ap_
+
+# Local archives/bundles
+*.zip
+
+# Environment files
+!.env.example
+*.local
+android/local.properties
+
+# Caches
+.cache
+.parcel-cache
+.turbo
+.next
+.nuxt
+.svelte-kit
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

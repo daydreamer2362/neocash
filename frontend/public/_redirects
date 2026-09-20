@@ -1,0 +1,2 @@
+/users_invite_code/:inviteCode   /#/register?invite=:inviteCode   302
+/register/:inviteCode            /#/register?invite=:inviteCode   302

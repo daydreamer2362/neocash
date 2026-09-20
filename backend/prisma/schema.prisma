@@ -1,0 +1,330 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String             @id @default(uuid())
+  phone               String             @unique
+  userName            String             @unique
+  password            String
+  googleId            String?            @unique
+  email               String?
+  pin                 String?
+  referralCode        String             @unique
+  inviterId           String?
+  availableBalance    Decimal            @default(0)
+  withdrawalBalance   Decimal            @default(0)
+  totalReward         Decimal            @default(0)
+  totalPayment        Decimal            @default(0)
+  totalReceive        Decimal            @default(0)
+  integralScore       Decimal            @default(0)
+  isSell              Boolean            @default(false)
+  welcomeBonusClaimed Boolean            @default(false)
+  isActive            Boolean            @default(true)
+  role                String             @default("USER")
+  totalUSDTTraded     Decimal            @default(0)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  commissionsSent     Commission[]       @relation("CommSender")
+  commissionsReceived Commission[]       @relation("CommReceiver")
+  paymentOrders       PaymentOrder[]
+  savedUpis           SavedUPI[]
+  transactions        Transaction[]
+  inviter             User?              @relation("Referral", fields: [inviterId], references: [id])
+  invitees            User[]             @relation("Referral")
+  notifications       UserNotification[]
+  orders              UserOrder[]
+  usdtOrders          USDTOrder[]
+
+  @@index([phone])
+  @@index([referralCode])
+  @@index([inviterId])
+}
+
+model Order {
+  id                String           @id @default(uuid())
+  code              String           @unique
+  amount            Decimal
+  reward            Decimal
+  incomePercent     Decimal          @default(4)
+  status            String           @default("READY")
+  createdAt         DateTime         @default(now())
+  adminUPIAccountId String?
+  expiryMinutes     Int              @default(30)
+  ifscCode          String?
+  payeeAccount      String?
+  payeeName         String?
+  paymentType       String           @default("IMPS")
+  payoutUPI         String?
+  payoutWallet      String?
+  referenceNo       String?
+  isCarousel        Boolean          @default(false)
+  updatedAt         DateTime         @default(now()) @updatedAt
+  payoutAccount     String?
+  adminUPIAccount   AdminUPIAccount? @relation(fields: [adminUPIAccountId], references: [id])
+  userOrders        UserOrder[]
+
+  @@index([status])
+  @@index([isCarousel, status])
+}
+
+model UserOrder {
+  id            String    @id @default(uuid())
+  buyId         String    @unique
+  userId        String
+  orderId       String
+  status        String    @default("PENDING")
+  voucher       String?
+  amount        Decimal
+  reward        Decimal
+  soldAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  expiresAt     DateTime?
+  utr           String?
+  payerName     String?
+  payerUPI      String?
+  payoutAccount String?
+  payoutUPI     String?
+  payoutWallet  String?
+  rejectReason  String?
+  rejectedAt    DateTime?
+  submittedAt   DateTime?
+  verifiedAt    DateTime?
+  voucherStatus String    @default("NONE")
+  order         Order     @relation(fields: [orderId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([buyId])
+  @@index([userId, amount])
+  @@index([status, expiresAt])
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      Decimal
+  type        String
+  status      String   @default("SUCCESS")
+  description String?
+  refId       String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+}
+
+model Commission {
+  id         String   @id @default(uuid())
+  userId     String
+  fromUserId String
+  amount     Decimal
+  level      String   @default("B")
+  orderId    String?
+  createdAt  DateTime @default(now())
+  sender     User     @relation("CommSender", fields: [fromUserId], references: [id])
+  receiver   User     @relation("CommReceiver", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([fromUserId])
+}
+
+model SavedUPI {
+  id         String   @id @default(uuid())
+  userId     String
+  upiId      String
+  holderName String
+  bankName   String?
+  ifsc       String?
+  isDefault  Boolean  @default(false)
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model AdminUPIAccount {
+  id             String         @id @default(uuid())
+  loginNumber    String
+  accountName    String
+  walletType     String
+  upiId          String?
+  bankName       String?
+  accountNumber  String?
+  ifsc           String?
+  isOnline       Boolean        @default(true)
+  dailyLimit     Decimal        @default(100000)
+  minAmount      Decimal        @default(100)
+  maxAmount      Decimal        @default(100000)
+  totalCollected Decimal        @default(0)
+  successCount   Int            @default(0)
+  totalCount     Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  lastUsedAt     DateTime?
+  offlineOrders  OfflineOrder[]
+  orders         Order[]
+
+  @@index([isOnline])
+  @@index([walletType])
+}
+
+model PaymentOrder {
+  id             String    @id @default(uuid())
+  userId         String
+  memberCode     String?
+  amount         Decimal
+  upiId          String?
+  bankName       String?
+  accountNumber  String?
+  ifsc           String?
+  status         String    @default("PENDING")
+  walletType     String?
+  payoutType     String?
+  merchantId     String?
+  remark         String?
+  settlementTime DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  utr            String?
+  user           User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OfflineOrder {
+  id                String           @id @default(uuid())
+  orderNumber       String           @unique
+  walletType        String
+  amount            Decimal
+  utr               String?
+  payerUPI          String?
+  payerName         String?
+  payerPhone        String?
+  status            String           @default("PENDING")
+  adminUPIAccountId String?
+  remark            String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  adminUPIAccount   AdminUPIAccount? @relation(fields: [adminUPIAccountId], references: [id])
+
+  @@index([status])
+  @@index([orderNumber])
+}
+
+model Mission {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  type        String
+  targetValue Decimal  @default(0)
+  rewardValue Decimal  @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  taskNumber  String?  @unique
+  taskType    String   @default("daily_tasks")
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model MissionClaim {
+  id        String   @id @default(uuid())
+  userId    String
+  missionId String
+  claimedAt DateTime @default(now())
+
+  @@unique([userId, missionId])
+}
+
+model UserNotification {
+  id        String    @id @default(uuid())
+  userId    String
+  title     String
+  body      String
+  type      String    @default("SYSTEM")
+  isRead    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model Notice {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+}
+
+model SecurityEventLog {
+  id        String    @id
+  type      String
+  severity  String
+  message   String
+  ip        String?
+  method    String?
+  path      String?
+  userAgent String?
+  meta      Json?
+  createdAt DateTime  @default(now())
+  resolvedAt DateTime?
+
+  @@index([createdAt])
+  @@index([severity, createdAt])
+  @@index([resolvedAt, createdAt])
+  @@index([type, createdAt])
+}
+
+model USDTOrder {
+  id             String   @id @default(uuid())
+  userId         String
+  amount         Decimal
+  rate           Decimal
+  bonus          Decimal
+  totalReceive   Decimal
+  walletAddress  String
+  type           String   @default("Bank-USDT")
+  status         String   @default("PENDING")
+  referenceNo    String   @unique
+  rejectReason   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([referenceNo])
+}
+
+model HeroCarousel {
+  id        String   @id @default(uuid())
+  type      String   @default("IMAGE")
+  mediaUrl  String
+  linkUrl   String?
+  title     String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}

@@ -1,0 +1,233 @@
+{
+  "info": {
+    "name": "NeoCash Admin Panel API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Admin Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/admin/login", "host": ["{{baseUrl}}"], "path": ["admin", "login"] },
+        "body": { "mode": "raw", "raw": "{\"phone\":\"9999999999\",\"password\":\"admin123\"}" }
+      }
+    },
+    {
+      "name": "Dashboard",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/admin/dashboard", "host": ["{{baseUrl}}"], "path": ["admin", "dashboard"] }
+      }
+    },
+    {
+      "name": "Create Orders",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/orders/generate", "host": ["{{baseUrl}}"], "path": ["admin", "orders", "generate"] },
+        "body": { "mode": "raw", "raw": "{\"amount\":200,\"reward\":8,\"count\":1,\"payeeAccount\":\"42380747998\",\"payeeName\":\"Ajay\",\"ifscCode\":\"SBIN0020146\",\"paymentType\":\"IMPS\",\"expiryMinutes\":30}" }
+      }
+    },
+    {
+      "name": "Orders List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/admin/orders/list?page=1&size=20", "host": ["{{baseUrl}}"], "path": ["admin", "orders", "list"], "query": [{ "key": "page", "value": "1" }, { "key": "size", "value": "20" }] }
+      }
+    },
+    {
+      "name": "Purchased Orders",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/admin/orders/purchased?page=1&size=20", "host": ["{{baseUrl}}"], "path": ["admin", "orders", "purchased"], "query": [{ "key": "page", "value": "1" }, { "key": "size", "value": "20" }] }
+      }
+    },
+    {
+      "name": "Mark Sold",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/orders/mark-sold", "host": ["{{baseUrl}}"], "path": ["admin", "orders", "mark-sold"] },
+        "body": { "mode": "raw", "raw": "{\"buyId\":\"ABCDEFG1\"}" }
+      }
+    },
+    {
+      "name": "Mark Failed",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/orders/mark-failed", "host": ["{{baseUrl}}"], "path": ["admin", "orders", "mark-failed"] },
+        "body": { "mode": "raw", "raw": "{\"buyId\":\"ABCDEFG1\",\"reason\":\"UTR mismatch\"}" }
+      }
+    },
+    {
+      "name": "Collection List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/admin/collection/list?page=1&size=20", "host": ["{{baseUrl}}"], "path": ["admin", "collection", "list"], "query": [{ "key": "page", "value": "1" }, { "key": "size", "value": "20" }] }
+      }
+    },
+    {
+      "name": "Verify Collection",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/collection/{{collectionId}}/verify", "host": ["{{baseUrl}}"], "path": ["admin", "collection", "{{collectionId}}", "verify"] },
+        "body": { "mode": "raw", "raw": "{\"action\":\"approve\"}" }
+      }
+    },
+    {
+      "name": "Payment Orders List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/admin/payment-orders/list?page=1&size=20", "host": ["{{baseUrl}}"], "path": ["admin", "payment-orders", "list"], "query": [{ "key": "page", "value": "1" }, { "key": "size", "value": "20" }] }
+      }
+    },
+    {
+      "name": "Create Payment Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/payment-orders/create", "host": ["{{baseUrl}}"], "path": ["admin", "payment-orders", "create"] },
+        "body": { "mode": "raw", "raw": "{\"userId\":\"USER_ID\",\"amount\":1000,\"upiId\":\"user@paytm\",\"walletType\":\"Paytm\"}" }
+      }
+    },
+    {
+      "name": "Update Payment Order Status",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/payment-orders/{{paymentOrderId}}/status", "host": ["{{baseUrl}}"], "path": ["admin", "payment-orders", "{{paymentOrderId}}", "status"] },
+        "body": { "mode": "raw", "raw": "{\"status\":\"SUCCESS\",\"utr\":\"123456789\"}" }
+      }
+    },
+    {
+      "name": "Offline Orders List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/admin/offline/list?page=1&size=20", "host": ["{{baseUrl}}"], "path": ["admin", "offline", "list"], "query": [{ "key": "page", "value": "1" }, { "key": "size", "value": "20" }] }
+      }
+    },
+    {
+      "name": "Create Offline Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/offline/create", "host": ["{{baseUrl}}"], "path": ["admin", "offline", "create"] },
+        "body": { "mode": "raw", "raw": "{\"walletType\":\"Paytm\",\"amount\":500,\"utr\":\"UTR123\"}" }
+      }
+    },
+    {
+      "name": "Update Offline Status",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/offline/{{offlineId}}/status", "host": ["{{baseUrl}}"], "path": ["admin", "offline", "{{offlineId}}", "status"] },
+        "body": { "mode": "raw", "raw": "{\"status\":\"SUCCESS\"}" }
+      }
+    },
+    {
+      "name": "UPI Accounts List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/admin/upi-accounts/list?page=1&size=20", "host": ["{{baseUrl}}"], "path": ["admin", "upi-accounts", "list"], "query": [{ "key": "page", "value": "1" }, { "key": "size", "value": "20" }] }
+      }
+    },
+    {
+      "name": "Create UPI Account",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/upi-accounts/create", "host": ["{{baseUrl}}"], "path": ["admin", "upi-accounts", "create"] },
+        "body": { "mode": "raw", "raw": "{\"loginNumber\":\"9304563346\",\"accountName\":\"Paytm 01\",\"walletType\":\"Paytm\",\"upiId\":\"paytm@paytm\"}" }
+      }
+    },
+    {
+      "name": "Toggle UPI Account",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/admin/upi-accounts/{{upiId}}/toggle", "host": ["{{baseUrl}}"], "path": ["admin", "upi-accounts", "{{upiId}}", "toggle"] }
+      }
+    },
+    {
+      "name": "Tasks List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/admin/tasks/list?page=1&size=20", "host": ["{{baseUrl}}"], "path": ["admin", "tasks", "list"], "query": [{ "key": "page", "value": "1" }, { "key": "size", "value": "20" }] }
+      }
+    },
+    {
+      "name": "Create Task",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/tasks/create", "host": ["{{baseUrl}}"], "path": ["admin", "tasks", "create"] },
+        "body": { "mode": "raw", "raw": "{\"taskNumber\":\"newbie_task\",\"title\":\"Newbie Task\",\"type\":\"FIRST_ORDER\",\"taskType\":\"newbie_tasks\",\"rewardValue\":200,\"targetValue\":30000}" }
+      }
+    },
+    {
+      "name": "Users List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/admin/users?page=1&size=20", "host": ["{{baseUrl}}"], "path": ["admin", "users"], "query": [{ "key": "page", "value": "1" }, { "key": "size", "value": "20" }] }
+      }
+    },
+    {
+      "name": "Update User Balance",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/admin/users/update-balance", "host": ["{{baseUrl}}"], "path": ["admin", "users", "update-balance"] },
+        "body": { "mode": "raw", "raw": "{\"userId\":\"USER_ID\",\"amount\":100,\"type\":\"add\"}" }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "adminToken", "value": "" }
+  ]
+}

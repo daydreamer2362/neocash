@@ -1,0 +1,17 @@
+node_modules/
+dist/
+dist-ssr/
+build/
+generated/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+!.env.production
+firebase-service-account.json
+*-service-account.json
+*.jks
+*.keystore
+signing-info.txt
+.DS_Store
+*.log

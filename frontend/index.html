@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="/logo/logo-icon.jpg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0E0E0E" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>NeoCash</title>
+    <script>
+      (function enforceHttps() {
+        var host = window.location.hostname;
+        var isManagedHost = host === 'neocash.online' || host === 'www.neocash.online';
+        if (isManagedHost && window.location.protocol === 'http:') {
+          var next = 'https://' + host + window.location.pathname + window.location.search + window.location.hash;
+          window.location.replace(next);
+        }
+      })();
+
+      (function mapInviteLinksToHashRoutes() {
+        if (window.location.hash) return;
+        var path = String(window.location.pathname || '');
+        var search = String(window.location.search || '');
+        var searchSuffix = search ? '&' + search.replace(/^\?/, '') : '';
+        var normalized = path.replace(/\/+$/, '') || '/';
+
+        var inviteFromUsersPath = normalized.match(/^\/users_invite_code\/([A-Za-z0-9]{3,32})$/);
+        if (inviteFromUsersPath) {
+          window.location.replace('/#/register?invite=' + encodeURIComponent(inviteFromUsersPath[1]) + searchSuffix);
+          return;
+        }
+
+        var inviteFromRegisterPath = normalized.match(/^\/register\/([A-Za-z0-9]{4,20})$/);
+        if (inviteFromRegisterPath) {
+          window.location.replace('/#/register?invite=' + encodeURIComponent(inviteFromRegisterPath[1]) + searchSuffix);
+          return;
+        }
+
+        var inviteFromRootPath = normalized.match(/^\/([A-Za-z0-9]{4,20})$/);
+        if (inviteFromRootPath) {
+          var matchedString = String(inviteFromRootPath[1]).toLowerCase();
+          var ignoredPaths = ['login', 'register', 'home', 'team', 'wallet', 'orders', 'score', 'deposit', 'payment', 'message', 'service', 'statistics', 'my'];
+          if (!ignoredPaths.includes(matchedString)) {
+            window.location.replace('/#/login?invite=' + encodeURIComponent(inviteFromRootPath[1]) + searchSuffix);
+          }
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

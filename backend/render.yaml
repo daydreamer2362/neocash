@@ -1,0 +1,45 @@
+databases:
+  - name: diwapay-db
+    databaseName: diwapay
+    plan: free
+
+services:
+  - type: web
+    name: diwapay-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: npx prisma migrate deploy && npm run start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: diwapay-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_JWT_SECRET
+        generateValue: true
+      - key: SECURITY_INGEST_KEY
+        generateValue: true
+      - key: SECURITY_SETTINGS_ENCRYPTION_KEY
+        generateValue: true
+      - key: APP_BASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ADMIN_PANEL_ORIGINS
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: TELEGRAM_THREAD_ID
+        sync: false
+      - key: SLACK_ALERT_WEBHOOK_URL
+        sync: false
