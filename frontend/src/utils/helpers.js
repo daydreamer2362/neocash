@@ -181,6 +181,15 @@ export const calcNextPollDelayMs = (attempt = 0, baseDelay = 5000, maxDelay = 15
   return Math.min(baseDelay + normalizedAttempt * 1000, maxDelay);
 };
 
+// Matches the backend's "phone/Google account already registered" error
+// codes (1005, 1043) or message text, regardless of whether the error object
+// is the parsed API response body or a generic Error.
+export const isAlreadyRegisteredError = (err) => {
+  const code = Number(err?.code || 0);
+  const msg = String(err?.msg || err?.message || '').toLowerCase();
+  return code === 1005 || code === 1043 || msg.includes('already registered');
+};
+
 export const formatDate = (dateStr) => {
   if (!dateStr) return '';
   const date = new Date(dateStr);

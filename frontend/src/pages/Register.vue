@@ -10,7 +10,7 @@
     <div class="register-form">
       <div class="input-group">
         <img src="/icons/user-line.png" class="input-icon" />
-        <input type="text" placeholder="User Name" v-model="username" />
+        <input type="text" placeholder="User Name" v-model="username" maxlength="12" />
       </div>
 
       <div class="input-group">
@@ -78,6 +78,8 @@ import { toast } from '../utils/toast'
 import { isTestAuthEnabled, registerTestUser } from '../utils/testAuth'
 import { auth } from '../api/auth'
 import { signInWithGoogle, signOutFirebase } from '../utils/firebase'
+import { isAlreadyRegisteredError } from '../utils/helpers'
+import { showConfirm } from '../components/ConfirmDialog.vue'
 import GoogleAuthPopup from '../components/GoogleAuthPopup.vue'
 
 export default {
@@ -142,8 +144,8 @@ export default {
         toast.show({ title: 'Please fill all required fields' })
         return
       }
-      if (!username || username.length < 5) {
-        toast.show({ title: 'Username must be at least 5 characters' })
+      if (!username || username.length < 5 || username.length > 12) {
+        toast.show({ title: 'Username must be 5-12 characters (letters, numbers, underscore)' })
         return
       }
       if (phone.length !== 10) {
@@ -191,12 +193,21 @@ export default {
 
     async handleGoogleRegister() {
       this.googleLoading = true;
+      let googleResult;
       try {
-        const googleResult = await signInWithGoogle();
-        this.googleIdToken = googleResult.idToken;
-        this.googleEmail = googleResult.email;
-        this.googleDisplayName = googleResult.displayName;
+        googleResult = await signInWithGoogle();
+      } catch (e) {
+        // Firebase-level failure (popup closed/blocked) never reaches our API
+        // client, so it's the one case that needs its own message here.
+        this.googleLoading = false;
+        toast.show({ title: 'Google sign-up was cancelled or failed. Please try again.' });
+        return;
+      }
+      this.googleIdToken = googleResult.idToken;
+      this.googleEmail = googleResult.email;
+      this.googleDisplayName = googleResult.displayName;
 
+      try {
         const res = await this.$api.userApi.googleLogin({ idToken: googleResult.idToken });
         const data = res?.data || {};
 
@@ -210,8 +221,10 @@ export default {
           this.$router.push('/home');
         }
       } catch (e) {
+        // The API client already showed a specific error toast (network,
+        // timeout, server, etc.) — showing another here would just replace
+        // it with a less useful generic message.
         await signOutFirebase();
-        toast.show({ title: 'Google sign-up failed. Please try again.' });
       } finally {
         this.googleLoading = false;
       }
@@ -233,6 +246,16 @@ export default {
         }
       } catch (e) {
         this.showGooglePopup = false;
+        if (isAlreadyRegisteredError(e)) {
+          showConfirm({
+            title: 'Account already exists',
+            content: 'An account with this phone number or Google account is already registered. Sign in with your phone and password, or contact support if you need help.',
+            confirmText: 'Sign In',
+            cancelText: 'Contact Support',
+            onConfirm: () => this.$router.push('/login'),
+            onCancel: () => this.$router.push('/service'),
+          });
+        }
         await signOutFirebase();
       }
     },

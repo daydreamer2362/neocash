@@ -79,6 +79,8 @@ import { createTestSession, isTestAuthEnabled, verifyTestLogin } from '../utils/
 import { config } from '../api/config'
 import { storage } from '../utils/storage'
 import { signInWithGoogle, signOutFirebase } from '../utils/firebase'
+import { isAlreadyRegisteredError } from '../utils/helpers'
+import { showConfirm } from '../components/ConfirmDialog.vue'
 import GoogleAuthPopup from '../components/GoogleAuthPopup.vue'
 
 export default {
@@ -170,12 +172,21 @@ export default {
 
     async handleGoogleLogin() {
       this.googleLoading = true;
+      let googleResult;
       try {
-        const googleResult = await signInWithGoogle();
-        this.googleIdToken = googleResult.idToken;
-        this.googleEmail = googleResult.email;
-        this.googleDisplayName = googleResult.displayName;
+        googleResult = await signInWithGoogle();
+      } catch (e) {
+        // Firebase-level failure (popup closed/blocked) never reaches our API
+        // client, so it's the one case that needs its own message here.
+        this.googleLoading = false;
+        toast.show({ title: 'Google sign-in was cancelled or failed. Please try again.' });
+        return;
+      }
+      this.googleIdToken = googleResult.idToken;
+      this.googleEmail = googleResult.email;
+      this.googleDisplayName = googleResult.displayName;
 
+      try {
         const res = await this.$api.userApi.googleLogin({ idToken: googleResult.idToken });
         const data = res?.data || {};
 
@@ -189,8 +200,10 @@ export default {
           this.$router.push('/home');
         }
       } catch (e) {
+        // The API client already showed a specific error toast (network,
+        // timeout, server, etc.) — showing another here would just replace
+        // it with a less useful generic message.
         await signOutFirebase();
-        toast.show({ title: 'Google sign-in failed. Please try again.' });
       } finally {
         this.googleLoading = false;
       }
@@ -212,6 +225,16 @@ export default {
         }
       } catch (e) {
         this.showGooglePopup = false;
+        if (isAlreadyRegisteredError(e)) {
+          showConfirm({
+            title: 'Account already exists',
+            content: 'An account with this phone number or Google account is already registered. Sign in with your phone number and password below, or contact support if you need help.',
+            confirmText: 'OK',
+            cancelText: 'Contact Support',
+            onConfirm: () => {},
+            onCancel: () => this.$router.push('/service'),
+          });
+        }
         await signOutFirebase();
       }
     }
