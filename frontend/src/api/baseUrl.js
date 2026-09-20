@@ -68,7 +68,19 @@ export function getCandidateBaseUrls(env, configuredCandidates = [], opts = {}) 
     deduped.push(normalized);
   };
 
-  const stored = getStoredBaseUrl(env);
+  let stored = getStoredBaseUrl(env);
+  // A cached "last working" URL is only trustworthy if it's still one of the
+  // URLs this build is actually configured to talk to. Otherwise it's left
+  // over from a previous deployment pointing at a different backend (e.g.
+  // after moving the API to a new host) - trying it first just wastes a
+  // round trip against a host that will reject us (often via CORS, since it
+  // has no reason to allowlist this origin).
+  const configuredSet = new Set((configuredCandidates || []).map(normalizeHttpUrl).filter(Boolean));
+  if (stored && configuredSet.size && !configuredSet.has(stored)) {
+    clearStoredBaseUrl(env);
+    stored = '';
+  }
+
   if (strictStoredOnly && stored) {
     add(stored);
     return deduped;
